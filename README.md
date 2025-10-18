@@ -1,42 +1,42 @@
-# Automated CAPTCHA Solver
+# AI-Powered CAPTCHA Solver
 
 ## Overview
-This project provides an automated solution for solving CAPTCHAs from image URLs. It is designed to process image URLs, extract CAPTCHA text, and return the solved string. The application defaults to using an attached sample image if no URL is provided.
+
+This project provides an automated solution for solving image-based CAPTCHAs. It takes a URL pointing to a CAPTCHA image and leverages AI models to accurately identify and return the text content of the CAPTCHA. A default sample image is included for immediate testing.
 
 ## Features
-*   **URL-based CAPTCHA solving:** Accepts a URL pointing to a CAPTCHA image for processing.
-*   **Default sample image handling:** Utilizes a pre-attached sample image when no URL is specified.
-*   **Text extraction:** Implements logic to recognize and extract characters from CAPTCHA images.
-*   **API endpoint:** Provides a simple interface for submitting CAPTCHA images.
+
+*   **URL-based Image Input**: Solves CAPTCHAs from provided image URLs.
+*   **Default Sample Image**: Includes a pre-attached sample image for quick demonstration.
+*   **AI-driven Recognition**: Utilizes advanced machine learning models for high accuracy.
+*   **Text Output**: Returns the solved CAPTCHA text in a clear format.
 
 ## Usage
-To use the CAPTCHA solver:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/captcha-solver-123.git
+    git clone <repository_url>
     cd captcha-solver-123
     ```
-2.  **Install dependencies:**
-    ```bash
-    # (Specify your dependency installation command here, e.g., pip install -r requirements.txt)
-    ```
-3.  **Run the application:**
-    ```bash
-    # (Specify your application run command here, e.g., python app.py)
-    ```
-4.  **Submit a CAPTCHA:**
-    *   **Via URL:** Send a GET request to the application endpoint with the `url` query parameter.
+
+2.  **Run the solver:**
+    *   **With a URL:**
+        ```bash
+        python main.py --url <image_url>
         ```
-        http://localhost:5000/?url=https://example.com/path/to/your/captcha.png
+        Replace `<image_url>` with the actual URL of the CAPTCHA image.
+
+    *   **Using the default sample image:**
+        ```bash
+        python main.py
         ```
-    *   **Using the default sample:** Access the application endpoint without any parameters.
-        ```
-        http://localhost:5000/
-        ```
+
+The solved CAPTCHA text will be printed to the console.
 
 ## Technical Details
-This application is built using [mention your primary language, e.g., Python] with the help of [mention key libraries/frameworks, e.g., Flask for the web framework and OpenCV/Pillow for image processing]. The core logic involves [briefly describe the image processing steps, e.g., image preprocessing (grayscale, thresholding, noise reduction) and character recognition using OCR techniques or a trained model].
+
+This application utilizes a Python backend. The core CAPTCHA solving functionality is powered by a pre-trained Optical Character Recognition (OCR) model. The model is responsible for analyzing the image pixels and converting them into readable text. The application handles image fetching from URLs and processes them for the OCR engine.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
