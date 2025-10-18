@@ -7,102 +7,237 @@
     <!-- Bootstrap 5 CSS from CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Custom styles for a professional look */
         body {
             background-color: #f8f9fa;
-            padding-top: 20px;
-            padding-bottom: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .container {
-            max-width: 800px;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-            border-radius: 10px;
+            margin-top: 50px;
+            margin-bottom: 50px;
             background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .captcha-image {
+        h1 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .spinner-border {
+            margin-right: 10px;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        img {
             max-width: 100%;
             height: auto;
             border: 1px solid #dee2e6;
             border-radius: 5px;
-            margin-bottom: 15px;
+            margin-top: 15px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            border-radius: 8px; /* Match container radius */
-        }
-        .error-message {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .success-message {
-            color: #28a745;
-            font-weight: bold;
-        }
-        footer {
-            margin-top: 30px;
+        .image-container {
             text-align: center;
-            font-size: 0.9em;
-            color: #6c757d;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1 class="mb-4">AI Captcha Solver</h1>
+
         <div class="row justify-content-center">
-            <div class="col-md-10">
-                <h1 class="text-center mb-4 mt-4">AI Captcha Solver</h1>
-
-                <div class="row align-items-center">
-                    <div class="col-md-12">
-                        <div class="form-group position-relative">
-                            <label for="imageUrl" class="form-label">Image URL</label>
-                            <input type="text" class="form-control" id="imageUrl" placeholder="Enter image URL (e.g., https://example.com/image.png)">
-                            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
+            <div class="col-md-8">
+                <form id="captchaForm">
+                    <div class="mb-3">
+                        <label for="imageUrl" class="form-label">Image URL</label>
+                        <input type="url" class="form-control" id="imageUrl" name="imageUrl" placeholder="Enter image URL (e.g., https://example.com/captcha.png)">
+                        <div class="form-text">Leave blank to use the default sample image.</div>
                     </div>
-                </div>
 
-                <div class="text-center mb-4">
-                    <button id="solveButton" class="btn btn-primary btn-lg">Solve Captcha</button>
-                    <button id="resetButton" class="btn btn-secondary btn-lg ms-2" style="display: none;">Reset</button>
-                </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <img id="captchaImage" src="" alt="Captcha Image" class="captcha-image mb-3" style="display: none;">
+                    <div class="image-container">
+                        <p class="form-label">Sample Captcha Image:</p>
+                        <img id="captchaImage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="Captcha Image">
                     </div>
-                </div>
 
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <div id="resultArea" class="mt-3" style="min-height: 50px;">
-                            <!-- Result will be displayed here -->
-                        </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="solveButton">
+                            <span id="buttonText">Solve Captcha</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="resultArea" class="mt-4 d-none">
+                    <div class="alert alert-success" role="alert" id="successAlert">
+                        <strong>Solved:</strong> <span id="captchaResult"></span>
+                    </div>
+                    <div class="alert alert-danger" role="alert" id="errorAlert">
+                        <strong>Error:</strong> <span id="errorMessage"></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2023 Captcha Solver. Powered by AI.</p>
-    </footer>
-
     <script>
-        // Default sample image data URI
-        const defaultImageUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAYCAYAAADj/j+vAAAEFUlEQVR4nNWaX0sbVRTHf0u21i7h0n/Mh7E010F/wS/x/4gP0H/Q+7k86Yx7f92169o9023M3x47N227t7e3t6/uLhMhCEzQj98hRBCK4gE/1OaU4Y/M93/0w/1Xb+n/g0w/24/0f6/8h/hH/kX/L3/0f/w/4z/7P/w/8m/9n/Y/43/xf/T/4D/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/1/wD/lP/
+        // --- Configuration ---
+        const DEFAULT_IMAGE_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Replace with actual sample image data URI if needed. This is a placeholder.
+        const API_ENDPOINT = "/solve-captcha"; // This is a placeholder for your backend API endpoint.
+
+        // --- DOM Elements ---
+        const imageUrlInput = document.getElementById('imageUrl');
+        const captchaImage = document.getElementById('captchaImage');
+        const solveButton = document.getElementById('solveButton');
+        const buttonText = document.getElementById('buttonText');
+        const spinner = document.getElementById('spinner');
+        const resultArea = document.getElementById('resultArea');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const captchaResultSpan = document.getElementById('captchaResult');
+        const errorMessageSpan = document.getElementById('errorMessage');
+
+        // --- Functions ---
+
+        /**
+         * Updates the captcha image displayed to the user.
+         * @param {string} url - The URL or data URI of the image.
+         */
+        function updateCaptchaImage(url) {
+            captchaImage.src = url;
+        }
+
+        /**
+         * Shows a loading state for the solve button.
+         */
+        function showLoadingState() {
+            buttonText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            solveButton.disabled = true;
+        }
+
+        /**
+         * Hides the loading state and restores the button to its default state.
+         */
+        function hideLoadingState() {
+            buttonText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+            solveButton.disabled = false;
+        }
+
+        /**
+         * Displays a success message with the solved captcha text.
+         * @param {string} result - The solved captcha text.
+         */
+        function displaySuccessMessage(result) {
+            captchaResultSpan.textContent = result;
+            successAlert.classList.remove('d-none');
+            errorAlert.classList.add('d-none');
+            resultArea.classList.remove('d-none');
+        }
+
+        /**
+         * Displays an error message.
+         * @param {string} message - The error message to display.
+         */
+        function displayErrorMessage(message) {
+            errorMessageSpan.textContent = message;
+            errorAlert.classList.remove('d-none');
+            successAlert.classList.add('d-none');
+            resultArea.classList.remove('d-none');
+        }
+
+        /**
+         * Resets the UI to its initial state.
+         */
+        function resetUI() {
+            resultArea.classList.add('d-none');
+            successAlert.classList.add('d-none');
+            errorAlert.classList.add('d-none');
+        }
+
+        /**
+         * Handles the form submission for solving the captcha.
+         * @param {Event} event - The form submission event.
+         */
+        async function handleSolveCaptcha(event) {
+            event.preventDefault(); // Prevent default form submission
+            resetUI();
+            showLoadingState();
+
+            const imageUrl = imageUrlInput.value.trim();
+            let imageToSolve = imageUrl || DEFAULT_IMAGE_DATA_URI;
+
+            // If using a URL, update the displayed image immediately
+            if (imageUrl) {
+                updateCaptchaImage(imageUrl);
+            } else {
+                // If using default, ensure it's displayed correctly
+                updateCaptchaImage(DEFAULT_IMAGE_DATA_URI);
+            }
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: imageToSolve }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Handle API errors
+                    const errorMsg = data.error || `HTTP error! status: ${response.status}`;
+                    throw new Error(errorMsg);
+                }
+
+                // Assuming the API returns { solution: "the_captcha_text" }
+                if (data.solution) {
+                    displaySuccessMessage(data.solution);
+                } else {
+                    throw new Error("API did not return a solution.");
+                }
+
+            } catch (error) {
+                console.error("Captcha solving failed:", error);
+                displayErrorMessage(error.message);
+            } finally {
+                hideLoadingState();
+            }
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('captchaForm').addEventListener('submit', handleSolveCaptcha);
+
+        // --- Initial Setup ---
+        // Set the default image when the page loads
+        updateCaptchaImage(DEFAULT_IMAGE_DATA_URI);
+
+        // Optional: Dynamically parse URL from query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialUrl = urlParams.get('url');
+        if (initialUrl) {
+            imageUrlInput.value = initialUrl;
+            updateCaptchaImage(initialUrl);
+        }
+
+    </script>
+</body>
+</html>
