@@ -1,30 +1,40 @@
-# Captcha Solver 123
+# AI-Powered CAPTCHA Solver
 
 ## Overview
-This project provides a web application designed to automatically solve CAPTCHA images. It can process CAPTCHA images provided via a URL parameter, with a default fallback to an attached sample image for testing.
+
+This project provides a web application capable of solving CAPTCHAs from provided image URLs or a default sample image. It leverages AI models to interpret and decode the distorted text within CAPTCHA images, making them programmatically accessible.
 
 ## Features
-*   Accepts CAPTCHA image URLs via the `?url=` query parameter.
-*   Includes a default sample CAPTCHA image for immediate testing.
-*   Automates the process of identifying and decoding CAPTCHA characters.
+
+*   **URL-based CAPTCHA Solving:** Accepts a `?url=` query parameter to specify the CAPTCHA image source.
+*   **Default Sample Image:** Includes a fallback mechanism to solve a pre-attached sample CAPTCHA image if no URL is provided.
+*   **AI-driven Recognition:** Utilizes advanced machine learning models for accurate text extraction from distorted CAPTCHAs.
+*   **Web Interface:** Provides a simple web interface for easy interaction and testing.
 
 ## Usage
-1.  **Run the application:**
+
+1.  **Clone the repository:**
     ```bash
-    # Assuming you have the application running locally on port 5000
+    git clone https://github.com/yourusername/captcha-solver-123.git
+    cd captcha-solver-123
+    ```
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Run the application:**
+    ```bash
     python app.py
     ```
-2.  **Solve a CAPTCHA from a URL:**
-    Open your browser and navigate to:
-    `http://localhost:5000/?url=https://example.com/path/to/your/captcha.png`
-    Replace `https://example.com/path/to/your/captcha.png` with the actual URL of the CAPTCHA image.
-3.  **Use the default sample CAPTCHA:**
-    Simply navigate to:
-    `http://localhost:5000/`
-    The application will use the pre-attached sample image.
+4.  **Access the web interface:** Open your browser and navigate to `http://127.0.0.1:5000/`.
+5.  **Solve a CAPTCHA:**
+    *   To solve the default sample CAPTCHA, simply visit the root URL.
+    *   To solve a CAPTCHA from a specific URL, append `?url=YOUR_IMAGE_URL` to the root URL. For example: `http://127.0.0.1:5000/?url=https://example.com/path/to/your/captcha.png`
 
 ## Technical Details
-The application utilizes [mention key libraries/frameworks used, e.g., Flask for web framework, OpenCV for image processing, Tesseract OCR for text recognition, etc.]. It involves image preprocessing steps such as grayscale conversion, noise reduction, and binarization to enhance character recognition accuracy before feeding the image to an OCR engine.
+
+The application is built using Flask as the web framework. It utilizes pre-trained AI models (e.g., for Optical Character Recognition - OCR) to analyze the image and extract the text. Image processing techniques are applied to enhance readability before feeding to the OCR engine.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
