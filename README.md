@@ -2,40 +2,37 @@
 
 ## Overview
 
-This project provides an automated solution for solving image-based CAPTCHAs. It takes a URL pointing to a CAPTCHA image and leverages AI models to accurately identify and return the text content of the CAPTCHA. A default sample image is included for immediate testing.
+This project provides an intelligent CAPTCHA solver designed to automatically decipher and solve image-based CAPTCHAs. It can process CAPTCHA images provided via a URL parameter or a default attached sample image.
 
 ## Features
 
-*   **URL-based Image Input**: Solves CAPTCHAs from provided image URLs.
-*   **Default Sample Image**: Includes a pre-attached sample image for quick demonstration.
-*   **AI-driven Recognition**: Utilizes advanced machine learning models for high accuracy.
-*   **Text Output**: Returns the solved CAPTCHA text in a clear format.
+*   **URL-based Image Input:** Solves CAPTCHAs from publicly accessible URLs specified with the `?url=` query parameter.
+*   **Default Sample Image:** Includes a fallback mechanism to solve a pre-attached sample CAPTCHA image if no URL is provided.
+*   **Image Processing Pipeline:** Employs advanced image processing techniques for noise reduction and character isolation.
+*   **Machine Learning Model:** Utilizes a trained machine learning model for accurate character recognition.
+*   **RESTful API:** Exposes a simple API endpoint for easy integration.
 
 ## Usage
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository_url>
-    cd captcha-solver-123
-    ```
+To use the CAPTCHA solver, send a GET request to the application's endpoint.
 
-2.  **Run the solver:**
-    *   **With a URL:**
-        ```bash
-        python main.py --url <image_url>
-        ```
-        Replace `<image_url>` with the actual URL of the CAPTCHA image.
+**Solving a CAPTCHA from a URL:**
 
-    *   **Using the default sample image:**
-        ```bash
-        python main.py
-        ```
+```bash
+curl "http://your-app-url.com/?url=https://example.com/path/to/your/captcha.png"
+```
 
-The solved CAPTCHA text will be printed to the console.
+**Solving the default sample CAPTCHA:**
+
+```bash
+curl "http://your-app-url.com/"
+```
+
+The response will be a JSON object containing the solved CAPTCHA text.
 
 ## Technical Details
 
-This application utilizes a Python backend. The core CAPTCHA solving functionality is powered by a pre-trained Optical Character Recognition (OCR) model. The model is responsible for analyzing the image pixels and converting them into readable text. The application handles image fetching from URLs and processes them for the OCR engine.
+The application is built using Python with Flask for the web framework. Image processing is handled by libraries like OpenCV and Pillow. Character recognition is powered by a Convolutional Neural Network (CNN) trained on a diverse dataset of CAPTCHA images. The model architecture and training process are optimized for speed and accuracy.
 
 ## License
 
