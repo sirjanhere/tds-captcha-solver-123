@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captcha Solver</title>
+    <title>CAPTCHA Solver</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -15,315 +15,97 @@
             max-width: 700px;
         }
         .captcha-image-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 300px; /* Fixed height for consistent layout */
-            background-color: #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden; /* Ensure image doesn't overflow */
+            position: relative;
+            display: inline-block;
+            border: 1px solid #dee2e6;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: .375rem;
         }
         .captcha-image-container img {
             max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Ensure image scales without distortion */
+            height: auto;
+            display: block;
         }
-        .loading-spinner {
-            display: none; /* Hidden by default */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
             justify-content: center;
             align-items: center;
-            height: 300px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            z-index: 10;
+            border-radius: .375rem;
         }
         .error-message {
-            display: none; /* Hidden by default */
-            margin-top: 15px;
+            color: #dc3545;
+            font-weight: bold;
         }
-        .result-area {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-            display: none; /* Hidden by default */
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
         }
-        .result-area code {
-            background-color: #e2f0e4;
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
-        .input-group-text {
-            background-color: #343a40;
-            color: white;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+        .form-control-plaintext {
+            background-color: #e9ecef;
+            border-radius: .25rem;
+            padding: .375rem .75rem;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <header class="text-center mb-4">
-            <h1 class="display-4">AI Captcha Solver</h1>
-            <p class="lead">Enter a URL to an image or use the default sample.</p>
-        </header>
+        <h1 class="text-center mb-4">CAPTCHA Solver</h1>
 
-        <main>
-            <div class="mb-3">
-                <label for="imageUrl" class="form-label">Image URL</label>
-                <div class="input-group">
-                    <span class="input-group-text" id="basic-addon1">URL</span>
-                    <input type="text" class="form-control" id="imageUrl" placeholder="e.g., https://example.com/image.png" aria-describedby="basic-addon1">
-                    <button class="btn btn-primary" type="button" id="loadUrlBtn">Load</button>
-                </div>
-                <div id="urlError" class="text-danger mt-2" style="display: none;">Invalid URL format.</div>
-            </div>
-
-            <div class="captcha-image-container" id="imageContainer">
-                <!-- Image will be loaded here -->
-                <img id="captchaImage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="Captcha Image Placeholder">
-            </div>
-
-            <div class="loading-spinner" id="loadingSpinner">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="urlInput" class="form-label">Image URL:</label>
+                        <input type="text" class="form-control" id="urlInput" placeholder="Enter image URL or leave blank for default">
+                    </div>
+                    <div class="col-md-6">
+                        <button id="loadCaptchaBtn" class="btn btn-primary w-100">Load CAPTCHA</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="text-center mb-3">
-                <button class="btn btn-success btn-lg" id="solveBtn">Solve Captcha</button>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body text-center">
+                <div id="captchaImageContainer" class="captcha-image-container">
+                    <img id="captchaImage" src="" alt="CAPTCHA Image">
+                    <div id="loadingOverlay" class="loading-overlay d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="alert alert-danger error-message" id="errorMessage" role="alert">
-                <!-- Error messages will be displayed here -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label for="captchaSolutionInput" class="form-label">CAPTCHA Solution:</label>
+                        <input type="text" class="form-control" id="captchaSolutionInput" placeholder="Enter the solution here">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button id="solveCaptchaBtn" class="btn btn-success w-100" disabled>Submit Solution</button>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="result-area" id="resultArea">
-                <h4>Solver Result:</h4>
-                <p id="resultText"></p>
-                <pre><code id="resultCode"></code></pre>
-            </div>
-        </main>
-
-        <footer class="text-center mt-5">
-            <p>&copy; 2023 AI Captcha Solver. All rights reserved.</p>
-        </footer>
+        <div id="statusMessageContainer" class="mt-3 text-center">
+            <!-- Status messages will appear here -->
+        </div>
     </div>
 
     <script>
         // --- Configuration ---
-        const DEFAULT_IMAGE_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Placeholder, actual sample will be loaded from URL or default
-        const CAPTCHA_SOLVER_API_URL = "https://api.example.com/solve-captcha"; // Replace with your actual API endpoint
-
-        // --- DOM Elements ---
-        const imageUrlInput = document.getElementById('imageUrl');
-        const loadUrlBtn = document.getElementById('loadUrlBtn');
-        const urlErrorDiv = document.getElementById('urlError');
-        const imageContainer = document.getElementById('imageContainer');
-        const captchaImage = document.getElementById('captchaImage');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const solveBtn = document.getElementById('solveBtn');
-        const errorMessageDiv = document.getElementById('errorMessage');
-        const resultArea = document.getElementById('resultArea');
-        const resultText = document.getElementById('resultText');
-        const resultCode = document.getElementById('resultCode');
-
-        // --- State Variables ---
-        let currentImageUrl = DEFAULT_IMAGE_DATA_URI;
-
-        // --- Helper Functions ---
-
-        /**
-         * Displays an error message to the user.
-         * @param {string} message - The error message to display.
-         */
-        function displayError(message) {
-            errorMessageDiv.textContent = message;
-            errorMessageDiv.style.display = 'block';
-            resultArea.style.display = 'none'; // Hide results if an error occurs
-        }
-
-        /**
-         * Clears any displayed error messages.
-         */
-        function clearError() {
-            errorMessageDiv.style.display = 'none';
-            errorMessageDiv.textContent = '';
-        }
-
-        /**
-         * Shows the loading spinner and hides the image and solve button.
-         */
-        function showLoading() {
-            imageContainer.style.display = 'none';
-            loadingSpinner.style.display = 'flex'; // Use flex to center spinner
-            solveBtn.disabled = true;
-            clearError(); // Clear errors when starting a new load
-        }
-
-        /**
-         * Hides the loading spinner and shows the image and solve button.
-         */
-        function hideLoading() {
-            imageContainer.style.display = 'flex'; // Use flex to center image
-            loadingSpinner.style.display = 'none';
-            solveBtn.disabled = false;
-        }
-
-        /**
-         * Loads an image from a given URL and displays it.
-         * Handles potential errors during image loading.
-         * @param {string} url - The URL of the image to load.
-         */
-        function loadImageFromUrl(url) {
-            showLoading(); // Show loading spinner
-            clearError(); // Clear any previous errors
-
-            // Validate URL format
-            try {
-                new URL(url); // This will throw an error if the URL is invalid
-                urlErrorDiv.style.display = 'none'; // Hide URL error if valid
-            } catch (_) {
-                urlErrorDiv.style.display = 'block'; // Show URL error if invalid
-                displayError("Invalid image URL format.");
-                hideLoading();
-                return;
-            }
-
-            captchaImage.onload = () => {
-                currentImageUrl = url; // Update current image URL if successfully loaded
-                hideLoading();
-            };
-            captchaImage.onerror = () => {
-                displayError(`Failed to load image from URL: ${url}. Please check the URL and try again.`);
-                captchaImage.src = DEFAULT_IMAGE_DATA_URI; // Reset to placeholder
-                currentImageUrl = DEFAULT_IMAGE_DATA_URI;
-                hideLoading();
-            };
-
-            captchaImage.src = url; // Set the image source to the provided URL
-        }
-
-        /**
-         * Initiates the captcha solving process.
-         * Sends the image URL to the backend API and displays the result or error.
-         */
-        async function solveCaptcha() {
-            if (!currentImageUrl || currentImageUrl === DEFAULT_IMAGE_DATA_URI) {
-                displayError("Please load a valid image first.");
-                return;
-            }
-
-            showLoading(); // Show loading spinner
-            resultArea.style.display = 'none'; // Hide previous results
-            clearError(); // Clear previous errors
-
-            try {
-                // Simulate an API call. Replace with actual fetch or axios call.
-                // For demonstration, we'll use a setTimeout and mock a response.
-                const response = await new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        // Mock API response
-                        if (Math.random() > 0.2) { // Simulate success 80% of the time
-                            resolve({
-                                status: 200,
-                                json: async () => ({
-                                    success: true,
-                                    solution: "ABC123XYZ", // Mock solution
-                                    confidence: 0.95,
-                                    message: "Captcha solved successfully."
-                                })
-                            });
-                        } else { // Simulate API error
-                            resolve({
-                                status: 500,
-                                json: async () => ({
-                                    success: false,
-                                    error: "Internal server error during solving.",
-                                    message: "The captcha solver encountered an issue."
-                                })
-                            });
-                        }
-                    }, 2000); // Simulate network latency
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    resultText.textContent = data.message || "Captcha solved successfully!";
-                    resultCode.textContent = `Solution: ${data.solution}\nConfidence: ${data.confidence}`;
-                    resultArea.style.display = 'block';
-                } else {
-                    displayError(data.message || data.error || "Captcha solving failed. Please try again.");
-                }
-            } catch (error) {
-                console.error("API call failed:", error);
-                displayError("An unexpected error occurred while trying to solve the captcha. Please check your connection and try again.");
-            } finally {
-                hideLoading(); // Hide loading spinner
-            }
-        }
-
-        // --- Event Listeners ---
-
-        // Load image from URL when button is clicked
-        loadUrlBtn.addEventListener('click', () => {
-            const url = imageUrlInput.value.trim();
-            if (url) {
-                loadImageFromUrl(url);
-            } else {
-                // If input is empty, load the default sample image
-                imageUrlInput.value = DEFAULT_IMAGE_DATA_URI; // Update input field for clarity
-                loadImageFromUrl(DEFAULT_IMAGE_DATA_URI);
-            }
-        });
-
-        // Load image from URL when Enter key is pressed in the input field
-        imageUrlInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission
-                loadUrlBtn.click(); // Trigger the load button click
-            }
-        });
-
-        // Solve captcha when the button is clicked
-        solveBtn.addEventListener('click', solveCaptcha);
-
-        // --- Initialization ---
-
-        // Function to parse URL parameters and load image if provided
-        function initializeFromUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const imageUrlParam = urlParams.get('url');
-
-            if (imageUrlParam) {
-                imageUrlInput.value = imageUrlParam;
-                loadImageFromUrl(imageUrlParam);
-            } else {
-                // Load default sample if no URL parameter is provided
-                // The default image is already set in the HTML, but we ensure it's displayed
-                // and set the currentImageUrl state.
-                captchaImage.src = DEFAULT_IMAGE_DATA_URI;
-                currentImageUrl = DEFAULT_IMAGE_DATA_URI;
-                imageContainer.style.display = 'flex';
-                loadingSpinner.style.display = 'none';
-            }
-        }
-
-        // Initialize the application when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeFromUrlParams();
-        });
-
-    </script>
-</body>
-</html>
+        // Default CAPTCHA image as a data URI
+        const defaultCaptchaDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF0AAAAoCAIAAAC/E45+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVhH7dZfBEYMwEEB3/9/X/HnJvJ20oM2vFhK+EAK/z328h/tS+5e+b/OQ+6H/R30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff91H/Q30X9Hff9
